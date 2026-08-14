@@ -1,11 +1,26 @@
+'use client'
+
 import Link from 'next/link'
+import { createClient } from '../lib/supabase'
+import { useRouter } from 'next/navigation'
 
-const mockUser = {
-  name: 'Priya Nair',
-  initials: 'PN',
-}
+export default function Navbar({ user }) {
+  const router = useRouter()
+  const supabase = createClient()
 
-export default function Navbar() {
+  const name = user?.user_metadata?.full_name || user?.email || 'User'
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    router.push('/')
+  }
+
   return (
     <nav className="border-b border-gray-200 bg-white">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -16,24 +31,19 @@ export default function Navbar() {
           snip
         </Link>
 
-        <div className="flex items-center gap-2 cursor-pointer select-none">
-          <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
-            <span className="text-white text-xs font-medium">{mockUser.initials}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
+              <span className="text-white text-xs font-medium">{initials}</span>
+            </div>
+            <span className="text-sm text-gray-700">{name}</span>
           </div>
-          <span className="text-sm text-gray-700">{mockUser.name}</span>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-gray-400"
+          <button
+            onClick={handleSignOut}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+            Sign out
+          </button>
         </div>
       </div>
     </nav>
