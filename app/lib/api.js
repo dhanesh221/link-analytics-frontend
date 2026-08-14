@@ -15,7 +15,7 @@ export async function getDjangoToken(supabase) {
   const cached = localStorage.getItem('django_access_token')
   if (cached) return cached
 
-  const { data: { session } } = await supabase.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   if (!session) return null
 
   const res = await fetch(`${BACKEND}/api/auth/supabase/`, {

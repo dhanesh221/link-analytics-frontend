@@ -16,18 +16,19 @@ export default function DashboardClient() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const token = await getDjangoToken(supabase)
-      setDjangoToken(token)
-      if (token) {
-        try {
+      try {
+        const supabase = createClient()
+        const token = await getDjangoToken(supabase)
+        setDjangoToken(token)
+        if (token) {
           const data = await fetchLinks(token)
           setLinks(data)
-        } catch (e) {
-          console.error('Failed to load links', e)
         }
+      } catch (e) {
+        console.error('Dashboard load error', e)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     load()
   }, [])
