@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { createClient } from '../lib/supabase'
+import { clearDjangoToken } from '../lib/api'
 import { useRouter } from 'next/navigation'
 
 export default function Navbar({ user }) {
@@ -17,6 +18,7 @@ export default function Navbar({ user }) {
     .slice(0, 2)
 
   async function handleSignOut() {
+    clearDjangoToken()
     await supabase.auth.signOut()
     router.push('/')
   }

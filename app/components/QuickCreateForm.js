@@ -2,14 +2,26 @@
 
 import { useState } from 'react'
 
-export default function QuickCreateForm() {
+export default function QuickCreateForm({ onSubmit }) {
   const [url, setUrl] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState(null)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    // TODO: call POST /api/links/ with JWT token
-    console.log('create link for:', url)
-    setUrl('')
+    setLoading(true)
+    setError(null)
+    try {
+      await onSubmit(url)
+      setUrl('')
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 2000)
+    } catch {
+      setError('Something went wrong. Try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -22,15 +34,19 @@ export default function QuickCreateForm() {
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com/very-long-url"
           required
-          className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600"
+          disabled={loading}
+          className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 disabled:opacity-50"
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shrink-0"
+          disabled={loading}
+          className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors shrink-0 disabled:opacity-50"
         >
-          Shorten
+          {loading ? 'Creating…' : 'Shorten'}
         </button>
       </form>
+      {success && <p className="mt-2 text-sm text-green-600">Link created!</p>}
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
     </div>
   )
 }
