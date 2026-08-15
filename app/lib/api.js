@@ -12,11 +12,12 @@ export function relativeTime(isoString) {
 }
 
 export async function getDjangoToken(supabase) {
-  const cached = localStorage.getItem('django_access_token')
-  if (cached) return cached
-
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return null
+
+  const cachedUserId = localStorage.getItem('django_token_user_id')
+  const cached = localStorage.getItem('django_access_token')
+  if (cached && cachedUserId === session.user.id) return cached
 
   const res = await fetch(`${BACKEND}/api/auth/supabase/`, {
     method: 'POST',
@@ -27,11 +28,13 @@ export async function getDjangoToken(supabase) {
 
   const { access } = await res.json()
   localStorage.setItem('django_access_token', access)
+  localStorage.setItem('django_token_user_id', session.user.id)
   return access
 }
 
 export function clearDjangoToken() {
   localStorage.removeItem('django_access_token')
+  localStorage.removeItem('django_token_user_id')
 }
 
 export async function fetchLinks(token) {

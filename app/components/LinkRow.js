@@ -42,7 +42,7 @@ export default function LinkRow({ shortUrl, originalUrl, clicks, createdAt }) {
   const [copied, setCopied] = useState(false)
 
   function handleCopy() {
-    navigator.clipboard.writeText(`https://${shortUrl}`)
+    navigator.clipboard.writeText(shortUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
   }
@@ -53,7 +53,7 @@ export default function LinkRow({ shortUrl, originalUrl, clicks, createdAt }) {
       <div className="sm:hidden">
         <div className="flex items-center justify-between gap-3">
           <a
-            href={`https://${shortUrl}`}
+            href={shortUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-medium text-indigo-600 hover:underline"
@@ -77,7 +77,7 @@ export default function LinkRow({ shortUrl, originalUrl, clicks, createdAt }) {
       {/* Desktop layout */}
       <div className="hidden sm:flex items-center gap-4">
         <a
-          href={`https://${shortUrl}`}
+          href={shortUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm font-medium text-indigo-600 hover:underline shrink-0 w-36"

@@ -31,6 +31,15 @@ export default function DashboardClient() {
       }
     }
     load()
+
+    function handleFocus() {
+      const token = localStorage.getItem('django_access_token')
+      if (token) {
+        fetchLinks(token).then(setLinks).catch((e) => console.error('Dashboard refresh error', e))
+      }
+    }
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
   }, [])
 
   async function handleCreate(url) {
