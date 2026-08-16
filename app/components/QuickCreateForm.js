@@ -10,8 +10,21 @@ export default function QuickCreateForm({ onSubmit }) {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+
+    let parsed
+    try {
+      parsed = new URL(url)
+    } catch {
+      setError('Enter a valid URL.')
+      return
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      setError('Only http:// and https:// links are allowed.')
+      return
+    }
+
+    setLoading(true)
     try {
       await onSubmit(url)
       setUrl('')
