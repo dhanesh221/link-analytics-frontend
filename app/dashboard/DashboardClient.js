@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '../lib/supabase'
-import { getDjangoToken, fetchLinks, createLink, relativeTime } from '../lib/api'
+import { getAccessToken, fetchLinks, createLink, relativeTime } from '../lib/api'
 import StatCard from '../components/StatCard'
 import QuickCreateForm from '../components/QuickCreateForm'
 import LinkRow from '../components/LinkRow'
@@ -12,20 +12,19 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 export default function DashboardClient() {
   const [links, setLinks] = useState([])
   const [loading, setLoading] = useState(true)
-  const [djangoToken, setDjangoToken] = useState(null)
+  const [accessToken, setAccessToken] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     async function load() {
       try {
         const supabase = createClient()
-        const token = await getDjangoToken(supabase)
-        setDjangoToken(token)
-        if (token) {
-          const data = await fetchLinks(token)
-          setLinks(data)
-        }
+        const token = await getAccessToken(supabase)
+        setAccessToken(token)
+        const data = await fetchLinks(token)
+        setLinks(data.results || data)
       } catch (e) {
-        console.error('Dashboard load error', e)
+        setError(e.message === 'SESSION_EXPIRED' ? 'Your session expired. Sign in again.' : 'The API is unavailable. A free host may need a moment to wake up.')
       } finally {
         setLoading(false)
       }
@@ -33,21 +32,15 @@ export default function DashboardClient() {
     load()
 
     function refresh() {
-      const token = localStorage.getItem('django_access_token')
-      if (token) {
-        fetchLinks(token).then(setLinks).catch((e) => console.error('Dashboard refresh error', e))
-      }
+      const supabase = createClient()
+      getAccessToken(supabase).then((token) => fetchLinks(token)).then((data) => setLinks(data.results || data)).catch(() => {})
     }
     window.addEventListener('focus', refresh)
-    const intervalId = setInterval(refresh, 5000)
-    return () => {
-      window.removeEventListener('focus', refresh)
-      clearInterval(intervalId)
-    }
+    return () => window.removeEventListener('focus', refresh)
   }, [])
 
   async function handleCreate(url) {
-    const newLink = await createLink(djangoToken, url)
+    const newLink = await createLink(accessToken, url)
     setLinks((prev) => [newLink, ...prev])
   }
 
@@ -69,7 +62,8 @@ export default function DashboardClient() {
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <QuickCreateForm onSubmit={handleCreate} />
+      {error && <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      <QuickCreateForm onSubmit={handleCreate} disabled={!accessToken} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat) => (
