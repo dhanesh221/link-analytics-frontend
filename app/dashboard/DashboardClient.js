@@ -9,6 +9,11 @@ import LinkRow from '../components/LinkRow'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
+function clickCount(link) {
+  const value = Number(link.click_count ?? 0)
+  return Number.isFinite(value) && value >= 0 ? value : 0
+}
+
 export default function DashboardClient() {
   const [links, setLinks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -44,7 +49,7 @@ export default function DashboardClient() {
     setLinks((prev) => [newLink, ...prev])
   }
 
-  const totalClicks = links.reduce((sum, l) => sum + l.click_count, 0)
+  const totalClicks = links.reduce((sum, link) => sum + clickCount(link), 0)
 
   const stats = [
     { label: 'Total links', value: String(links.length) },
@@ -82,7 +87,7 @@ export default function DashboardClient() {
                 key={link.id}
                 shortUrl={`${BACKEND_URL}/r/${link.short_code}`}
                 originalUrl={link.original_url}
-                clicks={link.click_count}
+                clicks={clickCount(link)}
                 createdAt={relativeTime(link.created_at)}
               />
             ))}
