@@ -40,7 +40,7 @@ export default function LoginPage() {
         </button>
 
         <p className="mt-6 text-center text-sm text-gray-400">
-          Shorten links and see exactly who's clicking.
+          Shorten links and see exactly who&apos;s clicking.
         </p>
       </div>
     </div>
