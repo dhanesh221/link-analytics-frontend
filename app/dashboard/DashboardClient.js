@@ -40,8 +40,14 @@ export default function DashboardClient() {
       const supabase = createClient()
       getAccessToken(supabase).then((token) => fetchLinks(token)).then((data) => setLinks(data.results || data)).catch(() => {})
     }
+    const intervalId = window.setInterval(() => {
+      if (!document.hidden) refresh()
+    }, 30000)
     window.addEventListener('focus', refresh)
-    return () => window.removeEventListener('focus', refresh)
+    return () => {
+      window.clearInterval(intervalId)
+      window.removeEventListener('focus', refresh)
+    }
   }, [])
 
   async function handleCreate(url) {
